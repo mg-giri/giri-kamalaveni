@@ -1,0 +1,1049 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MG Music - YouTube Player</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated gradient orbs */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    body::after {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      bottom: -100px;
+      right: -100px;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -30px); }
+      50% { transform: translate(-20px, 20px); }
+      75% { transform: translate(20px, 10px); }
+    }
+
+    /* Landing Page Styles */
+    .landing-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-page.hidden {
+      display: none;
+    }
+
+    .landing-logo {
+      font-size: 8rem;
+      margin-bottom: 1.5rem;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .landing-title {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      letter-spacing: 2px;
+    }
+
+    .landing-subtitle {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+
+    .landing-btn {
+      padding: 1.2rem 3rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .landing-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(245, 87, 108, 0.7);
+    }
+
+    .landing-features {
+      margin-top: 4rem;
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .feature {
+      text-align: center;
+      max-width: 200px;
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+    }
+
+    /* Main App Styles */
+    .main-app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .main-app.active {
+      display: block;
+    }
+
+    header {
+      padding: 1.2rem 2rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .brand-icon {
+      font-size: 1.8rem;
+    }
+
+    .brand-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 0.8rem;
+      flex: 1;
+      max-width: 600px;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.8rem 1.2rem;
+      border-radius: 50px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 200px);
+      padding: 1.5rem;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .results {
+      width: 38%;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .results::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .results::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+    }
+
+    .results::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+    }
+
+    .results::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      margin-bottom: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+    }
+
+    .result-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .result-item img {
+      width: 110px;
+      height: 62px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .result-item:hover img {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.3);
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .title {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .channel {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.82rem;
+    }
+
+    .player {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(245, 87, 108, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.2); opacity: 0.5; }
+    }
+
+    #player {
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .album-art {
+      width: 240px;
+      height: 240px;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+
+    .album-art:hover {
+      transform: scale(1.02);
+    }
+
+    .album-placeholder {
+      width: 240px;
+      height: 240px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(245, 87, 108, 0.25) 0%, rgba(240, 147, 251, 0.25) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 1;
+      border: 2px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .music-visualizer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      height: 80px;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bar {
+      width: 6px;
+      background: linear-gradient(to top, #f093fb, #f5576c);
+      border-radius: 10px;
+      animation: visualize 0.8s ease-in-out infinite alternate;
+      box-shadow: 0 0 10px rgba(245, 87, 108, 0.4);
+    }
+
+    .bar:nth-child(1) { animation-delay: 0s; height: 20px; }
+    .bar:nth-child(2) { animation-delay: 0.1s; height: 35px; }
+    .bar:nth-child(3) { animation-delay: 0.2s; height: 55px; }
+    .bar:nth-child(4) { animation-delay: 0.3s; height: 70px; }
+    .bar:nth-child(5) { animation-delay: 0.4s; height: 55px; }
+    .bar:nth-child(6) { animation-delay: 0.5s; height: 35px; }
+    .bar:nth-child(7) { animation-delay: 0.6s; height: 20px; }
+
+    @keyframes visualize {
+      0% { transform: scaleY(0.3); }
+      100% { transform: scaleY(1); }
+    }
+    
+    /* === New Styles for Playback Timer/Progress Bar/Quality Button === */
+    .playback-info {
+        width: 100%;
+        max-width: 300px; /* Aligns with player elements */
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .time-display {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .progress-bar-container {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #f093fb, #f5576c);
+        border-radius: 4px;
+        transition: width 0.3s linear;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translate(50%, -50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #f5576c;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .progress-bar-container:hover .progress-bar::after {
+        opacity: 1;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+      align-items: center;
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
+    }
+
+    .control-btn-small {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .control-btn-small:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
+    
+    .control-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(245, 87, 108, 0.7);
+    }
+
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+
+    .now-playing {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .now-playing-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0.8rem;
+    }
+
+    .now-playing-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 2s ease-in-out infinite;
+      max-width: 500px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .empty-state-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+
+    .empty-state-text {
+      font-size: 1.05rem;
+    }
+
+    footer {
+      padding: 1.2rem 2rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .footer-brand span {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-text {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 968px) {
+      .landing-title {
+        font-size: 2.5rem;
+      }
+
+      .landing-subtitle {
+        font-size: 1.2rem;
+      }
+
+      .landing-features {
+        gap: 2rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .search-container {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .container {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .results {
+        width: 100%;
+        max-height: 300px;
+      }
+
+      .player {
+        padding: 2rem;
+      }
+
+      .album-art,
+      .album-placeholder {
+        width: 200px;
+        height: 200px;
+      }
+
+      .now-playing-title {
+        font-size: 1.3rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .landing-logo {
+        font-size: 5rem;
+      }
+
+      .landing-title {
+        font-size: 2rem;
+      }
+
+      .landing-subtitle {
+        font-size: 1rem;
+      }
+
+      header {
+        padding: 1rem;
+      }
+
+      .brand-name {
+        font-size: 1.3rem;
+      }
+
+      button {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.85rem;
+      }
+
+      .album-art,
+      .album-placeholder {
+        width: 180px;
+        height: 180px;
+      }
+
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div class="landing-page" id="landingPage">
+    <div class="landing-logo">🎵</div>
+    <h1 class="landing-title">MG Music</h1>
+    <p class="landing-subtitle">Your ultimate destination for streaming YouTube music</p>
+    <button class="landing-btn" onclick="enterApp()">Start Listening</button>
+    
+    <div class="landing-features">
+      <div class="feature">
+        <div class="feature-icon">🎧</div>
+        <div class="feature-text">High Quality Audio</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-text">Search Any Song</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-text">Fast & Smooth</div>
+      </div>
+    </div>
+  </div>
+
+    <div class="main-app" id="mainApp">
+    <header>
+      <div class="header-content">
+        <div class="brand">
+          <div class="brand-icon">🎵</div>
+          <div class="brand-name">MG Music</div>
+        </div>
+        <div class="search-container">
+          <input id="searchInput" type="text" placeholder="Search for songs, artists, albums..." />
+          <button onclick="doSearch()">Search</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="results" id="results">
+        <div class="empty-state">
+          <div class="empty-state-icon">🎵</div>
+          <div class="empty-state-text">Search for music to get started</div>
+        </div>
+      </div>
+
+      <div class="player">
+        <div id="player"></div>
+        <div id="albumArt" class="album-placeholder">🎵</div>
+        
+        <div class="playback-info">
+          <div class="time-display">
+            <span id="currentTime">00:00</span>
+            <span id="durationTime">00:00</span>
+          </div>
+          <div class="progress-bar-container" onclick="seek(event)">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn-small" onclick="toggleQualitySettings()">⚙️</button>
+
+                      <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
+        </div>
+
+        <div class="music-visualizer">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        
+        <div id="nowPlaying" class="now-playing">
+          <div class="now-playing-label">Now Playing</div>
+          <div class="now-playing-title">Select a song to play</div>
+        </div>
+
+        <div id="qualitySettings" style="display:none; margin-top: 1.5rem; color: rgba(255, 255, 255, 0.7); text-align: center; max-width: 300px; position: relative; z-index: 1;">
+            <p>🎧 **Audio Quality:** Managed automatically by YouTube for optimal performance.</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">The highest available audio quality is always prioritized for music playback.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span>🎵 MG Music</span>
+        </div>
+        <div class="footer-text">© 2024 MG Music. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player = null;
+    let userInteracted = false;
+    let isPlaying = false;
+    let updateTimerInterval = null;
+
+    function enterApp() {
+      document.getElementById('landingPage').classList.add('hidden');
+      document.getElementById('mainApp').classList.add('active');
+    }
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '1',
+        width: '1',
+        videoId: '',
+        playerVars: {
+          'playsinline': 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function formatTime(timeInSeconds) {
+        if (isNaN(timeInSeconds) || timeInSeconds < 0) return '00:00';
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function updateTimer() {
+        if (!player || !player.getCurrentTime) return;
+
+        const currentTime = player.getCurrentTime();
+        const duration = player.getDuration();
+        
+        document.getElementById('currentTime').textContent = formatTime(currentTime);
+
+        if (duration > 0) {
+            const percentage = (currentTime / duration) * 100;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+        }
+    }
+
+    function stopTimerInterval() {
+        if (updateTimerInterval) {
+            clearInterval(updateTimerInterval);
+            updateTimerInterval = null;
+        }
+    }
+    
+    function onPlayerReady(event) {
+      console.log("YouTube Player Ready");
+    }
+
+    function onPlayerStateChange(event) {
+        // Clear interval on state change to manage it precisely
+        stopTimerInterval();
+        
+      if (event.data === YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        document.getElementById('playPauseBtn').innerHTML = '⏸️';
+        // Start updating the timer every second when playing
+        updateTimerInterval = setInterval(updateTimer, 1000);
+      } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+        isPlaying = false;
+        document.getElementById('playPauseBtn').innerHTML = '▶️';
+      } else if (event.data === YT.PlayerState.ENDED) {
+        isPlaying = false;
+        document.getElementById('playPauseBtn').innerHTML = '▶️';
+        document.getElementById('currentTime').textContent = '00:00';
+        document.getElementById('progressBar').style.width = '0%';
+    }
+    }
+
+    function togglePlayPause() {
+      if (!player || !player.getPlayerState || player.getDuration() === 0) {
+            console.log("Player not ready or no video loaded.");
+            return;
+        }
+      
+      if (isPlaying) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+        // Crucial for mobile/desktop autoplay policies: unmute only after user interaction
+        if (!userInteracted) {
+          userInteracted = true;
+          player.unMute();
+        }
+      }
+    }
+
+    // Logic for seeking when the progress bar is clicked
+    function seek(event) {
+        if (!player || !player.getDuration || player.getDuration() === 0) return;
+
+        const container = event.currentTarget; // The progress-bar-container
+        const clickPosition = event.offsetX;
+        const containerWidth = container.offsetWidth;
+        const duration = player.getDuration();
+
+        if (duration > 0) {
+            const seekTime = (clickPosition / containerWidth) * duration;
+            player.seekTo(seekTime, true);
+            // Immediately update UI to reflect the click
+            document.getElementById('progressBar').style.width = `${(clickPosition / containerWidth) * 100}%`;
+            document.getElementById('currentTime').textContent = formatTime(seekTime);
+        }
+    }
+
+    function toggleQualitySettings() {
+        const settings = document.getElementById('qualitySettings');
+        settings.style.display = settings.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.addEventListener("click", () => {
+      userInteracted = true;
+    });
+
+    // *** Note: This function requires a server-side endpoint `/search?q=...` to work. ***
+    // I added error handling here as the original code assumed the endpoint existed.
+    async function doSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+      
+      try {
+            const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const data = await res.json();
+            renderResults(data);
+            
+            if (data.length > 0) {
+                // Play the first result
+                playVideo(data[0].videoId, data[0].title);
+            }
+        } catch (error) {
+            console.error("Search failed. Ensure your server handles the /search endpoint.", error);
+            const container = document.getElementById('results');
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">Search failed. Please ensure the backend search API is running and configured correctly.</div></div>`;
+        }
+    }
+
+    function renderResults(videos) {
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+        
+        if (videos.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">No results found for your search. Try a different query.</div></div>`;
+            return;
+        }
+      
+      videos.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.innerHTML = `
+          <img src="${v.thumbnail}" alt="">
+          <div class="result-info">
+            <div class="title">${v.title}</div>
+            <div class="channel">${v.channel}</div>
+          </div>
+        `;
+        div.onclick = () => playVideo(v.videoId, v.title);
+        container.appendChild(div);
+      });
+    }
+
+    function playVideo(videoId, title) {
+        // Use a flag to track if the API is initialized and the player object exists
+        if (!player || typeof player.loadVideoById !== 'function') {
+            console.warn("YouTube Player API not fully ready, delaying playback...");
+            setTimeout(() => playVideo(videoId, title), 500);
+            return;
+        }
+      
+      player.loadVideoById(videoId);
+      player.mute(); // Start muted due to browser policy
+      player.playVideo();
+      
+      setTimeout(() => {
+        if (userInteracted) {
+          player.unMute(); // Unmute if the user has already interacted
+        }
+        
+        // Update total duration time
+        const checkDuration = () => {
+            const duration = player.getDuration();
+            if (duration > 0) {
+                document.getElementById('durationTime').textContent = formatTime(duration);
+            } else {
+                setTimeout(checkDuration, 200); // Check again until duration is available
+            }
+        };
+        checkDuration();
+
+      }, 1000);
+      
+      document.querySelector('.now-playing-title').textContent = title;
+      
+      // Update album art
+      const albumArtContainer = document.getElementById('albumArt');
+      const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      albumArtContainer.innerHTML = `<img src="${thumbnail}" class="album-art" alt="${title}" onerror="this.parentElement.innerHTML='<div class=\\'album-placeholder\\'>🎵</div>'">`;
+    }
+
+    // Allow Enter key to search
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        doSearch();
+      }
+    });
+  </script>
+</body>
+</html>
